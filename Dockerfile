@@ -1,30 +1,20 @@
-FROM docker.io/library/golang:1.16-alpine
+FROM golang:1.12-alpine as builder
 
-# Set destination for COPY
+ENV GO111MODULE=on
+
 WORKDIR /app
+COPY . .
 
-# Download Go modules
-COPY go.mod .
-COPY go.sum .
-RUN go mod download
+RUN apk --no-cache add git alpine-sdk build-base gcc
 
-# Copy the source code. Note the slash at the end, as explained in
-# https://docs.docker.com/engine/reference/builder/#copy
-COPY *.go ./
+RUN go get \
+    && go get golang.org/x/tools/cmd/cover \
+    && go get github.com/mattn/goveralls
 
-# Build
-RUN go build -o /docker-gs-ping
+RUN go build -o example cmd/example/main.go
 
-# This is for documentation purposes only.
-# To actually open the port, runtime parameters
-# must be supplied to the docker command.
-EXPOSE 8080
-
-# (Optional) environment variable that our dockerised
-# application can make use of. The value of environment
-# variables can also be set via parameters supplied
-# to the docker command on the command line.
-#ENV HTTP_PORT=8081
-
-# Run
-CMD [ "/docker-gs-ping" ]
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=builder /app/example .
+CMD ["./example"]

@@ -56,7 +56,6 @@ spec:
         - $(inputs.params.destinationImage)
         - "docker://$(inputs.params.destinationImage)"
       securityContext:
-        runAsUser: 0
         privileged: true
       volumeMounts:
         - name: varlibc
