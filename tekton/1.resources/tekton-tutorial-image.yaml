@@ -6,5 +6,5 @@ spec:
   type: image
   params:
     - name: url
-      # use internal registry
-      value: example.com/harbur/tekton-tutorial
+      # use docker registry
+      value: docker.io/bsoma/buildapp
